@@ -1,7 +1,65 @@
 //控制层
-app.controller('goodsController', function ($scope, $controller, goodsService, uploadService) {
+app.controller('goodsController', function ($scope, $controller, goodsService, uploadService, itemCatService, typeTemplateService) {
 
     $controller('baseController', {$scope: $scope});//继承
+
+
+    $scope.selectItemCat1List = function () {
+        itemCatService.findByParentId(0).success(
+            function (response) {
+                $scope.itemCat1List = response;
+
+            }
+        );
+    };
+
+    $scope.$watch('entity.tbGoods.category1Id', function (newValue, oldValue) {
+        itemCatService.findByParentId(newValue).success(
+            function (response) {
+                $scope.itemCat2List = response;
+
+            }
+        );
+    });
+
+    $scope.$watch('entity.tbGoods.category2Id', function (newValue, oldValue) {
+        itemCatService.findByParentId(newValue).success(
+            function (response) {
+                $scope.itemCat3List = response;
+
+            }
+        );
+    });
+
+
+    $scope.$watch('entity.tbGoods.category3Id', function (newValue, oldValue) {
+        itemCatService.findOne(newValue).success(
+            function (response) {
+                $scope.entity.tbGoods.typeTemplateId = response.typeId;
+
+            }
+        );
+    });
+
+
+    $scope.$watch('entity.tbGoods.typeTemplateId', function (newValue, oldValue) {
+        typeTemplateService.findOne(newValue).success(
+            function (response) {
+                $scope.typeTemplate = response;
+                $scope.typeTemplate.brandIds = JSON.parse($scope.typeTemplate.brandIds);
+                $scope.entity.tbGoodsDesc.customAttributeItems = JSON.parse($scope.typeTemplate.customAttributeItems);
+            }
+        );
+
+        typeTemplateService.findSpecList(newValue).success(
+            function (response) {
+                $scope.specList = response;
+            }
+        );
+
+
+    });
+
 
     $scope.uploadFile = function () {
         uploadService.uploadFile().success(
@@ -16,7 +74,54 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
         });
     };
 
-    $scope.entity = {tbGoods: {}, tbGoodsDesc: {itemImages: []}};
+    $scope.entity = {tbGoods: {}, tbGoodsDesc: {itemImages: [], specificationItems: []}};
+
+    $scope.updateSpecAttribute = function ($event, name, value) {
+        let object = $scope.searchObjectByKey($scope.entity.tbGoodsDesc.specificationItems, 'attributeName', name);
+
+        if (object) {
+            if ($event.target.checked) {
+                object.attributeValue.push(value);
+            } else {
+                object.attributeValue.splice(object.attributeValue.indexOf(value), 1);
+                if (object.attributeValue.length === 0) {
+                    $scope.entity.tbGoodsDesc.specificationItems.splice(
+                        $scope.entity.tbGoodsDesc.specificationItems.indexOf(object), 1);
+                }
+
+            }
+        } else {
+            $scope.entity.tbGoodsDesc.specificationItems.push({"attributeName": name, "attributeValue": [value]});
+        }
+    };
+
+
+    $scope.createItemList = function () {
+
+        $scope.entity.tbItemList = [{spec: {}, price: 0, num: 99999, status: '0', isDefault: '0'}];
+
+        let items = $scope.entity.tbGoodsDesc.specificationItems;
+
+        for (let i = 0; i < items.length; i++) {
+            $scope.entity.tbItemList = addColumn($scope.entity.tbItemList, items[i].attributeName, items[i].attributeValue);
+        }
+
+    };
+
+    let addColumn = function (list, columnName, columnValues) {
+
+        let newList = [];
+        for (let i = 0; i < list.length; i++) {
+            let oldRow = list[i];
+            for (let j = 0; j < columnValues.length; j++) {
+                let newRow = JSON.parse(JSON.stringify(oldRow));
+                newRow.spec[columnName] = columnValues[j];
+                newList.push(newRow);
+            }
+        }
+        return newList;
+    };
+
 
     $scope.add_image_entity = function () {
         $scope.entity.tbGoodsDesc.itemImages.push($scope.image_entity);
@@ -50,7 +155,8 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 $scope.list = response;
             }
         );
-    }
+    };
+
 
     //分页
     $scope.findPage = function (page, rows) {
@@ -60,7 +166,8 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 $scope.paginationConf.totalItems = response.total;//更新总记录数
             }
         );
-    }
+    };
+
 
     //查询实体
     $scope.findOne = function (id) {
@@ -69,7 +176,8 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 $scope.entity = response;
             }
         );
-    }
+    };
+
 
     //保存
     $scope.save = function () {
@@ -89,7 +197,7 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 }
             }
         );
-    }
+    };
 
 
     //批量删除
@@ -103,7 +211,7 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 }
             }
         );
-    }
+    };
 
     $scope.searchEntity = {};//定义搜索对象
 

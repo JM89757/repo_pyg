@@ -56,7 +56,7 @@
             </div>
         </div>
         <!--工具栏/-->
-
+        {{selectIds}}
         <!--数据列表-->
         <table class="table table-bordered table-striped table-hover dataTable" id="dataList">
             <thead>
@@ -72,7 +72,8 @@
             </thead>
             <tbody>
             <tr ng-repeat="entity in list">
-                <td><input ng-click="updateSelection($event, entity.id)" type="checkbox"></td>
+                <td><input ng-checked="selectCheck(entity.id)" ng-click="updateSelection($event, entity.id)"
+                           type="checkbox"></td>
                 <td>{{entity.id}}</td>
                 <td>{{entity.name}}</td>
                 <td>{{entity.firstChar}}</td>

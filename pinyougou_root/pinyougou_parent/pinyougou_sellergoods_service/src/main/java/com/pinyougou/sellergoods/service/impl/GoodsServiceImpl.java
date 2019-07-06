@@ -1,16 +1,16 @@
 package com.pinyougou.sellergoods.service.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import com.pinyougou.mapper.TbGoodsDescMapper;
-import com.pinyougou.pojo.GoodsEntityGroup;
+import com.alibaba.fastjson.JSON;
+import com.pinyougou.mapper.*;
+import com.pinyougou.pojo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.pinyougou.mapper.TbGoodsMapper;
-import com.pinyougou.pojo.TbGoods;
-import com.pinyougou.pojo.TbGoodsExample;
 import com.pinyougou.pojo.TbGoodsExample.Criteria;
 import com.pinyougou.sellergoods.service.GoodsService;
 
@@ -23,6 +23,23 @@ import entity.PageResult;
  */
 @Service
 public class GoodsServiceImpl implements GoodsService {
+
+
+    @Autowired
+    private TbItemMapper itemMapper;
+
+
+    @Autowired
+    private TbBrandMapper brandMapper;
+
+
+    @Autowired
+    private TbItemCatMapper itemCatMapper;
+
+
+    @Autowired
+    private TbSellerMapper sellerMapper;
+
 
     @Autowired
     private TbGoodsMapper goodsMapper;
@@ -61,6 +78,33 @@ public class GoodsServiceImpl implements GoodsService {
         goodsMapper.insert(goods.getTbGoods());
         goods.getTbGoodsDesc().setGoodsId(goods.getTbGoods().getId());
         tbGoodsDescMapper.insert(goods.getTbGoodsDesc());
+        if ("1".equals(goods.getTbGoods().getIsEnableSpec())) {
+            for (TbItem item : goods.getTbItemList()) {
+                String goodsName = goods.getTbGoods().getGoodsName();
+                Map<String, Object> map = JSON.parseObject(item.getSpec());
+                for (String key : map.keySet()) {
+                    goodsName += " " + map.get(key);
+                }
+                item.setTitle(goodsName);
+                item.setGoodsId(goods.getTbGoods().getId());
+                item.setSellerId(goods.getTbGoods().getSellerId());
+                item.setCategoryid(goods.getTbGoods().getCategory3Id());
+                item.setCreateTime(new Date());
+                item.setUpdateTime(new Date());
+                TbBrand brand = brandMapper.selectByPrimaryKey(goods.getTbGoods().getBrandId());
+                item.setBrand(brand.getName());
+                TbItemCat itemCat = itemCatMapper.selectByPrimaryKey(goods.getTbGoods().getCategory3Id());
+                item.setCategory(itemCat.getName());
+                TbSeller seller = sellerMapper.selectByPrimaryKey(goods.getTbGoods().getSellerId());
+                item.setSeller(seller.getNickName());
+                List<Map> imageList = JSON.parseArray(goods.getTbGoodsDesc().getItemImages(), Map.class);
+                if (imageList.size() > 0) {
+                    item.setImage((String) imageList.get(0).get("url"));
+                }
+                itemMapper.insert(item);
+
+            }
+        }
     }
 
     /**

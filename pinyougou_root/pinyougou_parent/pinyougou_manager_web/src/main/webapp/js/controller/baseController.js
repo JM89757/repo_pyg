@@ -25,6 +25,17 @@ app.controller('baseController', function ($scope) {
         }
     };
 
+    $scope.selectCheck = function (id) {
+        for (let i = 0; i < $scope.selectIds.length; i++) {
+            if (id === $scope.selectIds[i]) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+
+
     $scope.jsonToString = function (jsonString, key) {
         var json = JSON.parse(jsonString);
         var value = "";

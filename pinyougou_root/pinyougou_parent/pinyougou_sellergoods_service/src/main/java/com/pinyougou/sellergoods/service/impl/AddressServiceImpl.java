@@ -22,7 +22,7 @@ public class AddressServiceImpl implements AddressService {
 
 	@Autowired
 	private TbAddressMapper addressMapper;
-	
+
 	/**
 	 * 查询全部
 	 */
@@ -36,7 +36,7 @@ public class AddressServiceImpl implements AddressService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
+		PageHelper.startPage(pageNum, pageSize);
 		Page<TbAddress> page=   (Page<TbAddress>) addressMapper.selectByExample(null);
 		return new PageResult(page.getTotal(), page.getResult());
 	}
@@ -46,18 +46,18 @@ public class AddressServiceImpl implements AddressService {
 	 */
 	@Override
 	public void add(TbAddress address) {
-		addressMapper.insert(address);		
+		addressMapper.insert(address);
 	}
 
-	
+
 	/**
 	 * 修改
 	 */
 	@Override
 	public void update(TbAddress address){
 		addressMapper.updateByPrimaryKey(address);
-	}	
-	
+	}
+
 	/**
 	 * 根据ID获取实体
 	 * @param id
@@ -75,18 +75,18 @@ public class AddressServiceImpl implements AddressService {
 	public void delete(Long[] ids) {
 		for(Long id:ids){
 			addressMapper.deleteByPrimaryKey(id);
-		}		
+		}
 	}
-	
-	
+
+
 		@Override
 	public PageResult findPage(TbAddress address, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
-		
+
 		TbAddressExample example=new TbAddressExample();
 		Criteria criteria = example.createCriteria();
-		
-		if(address!=null){			
+
+		if(address!=null){
 						if(address.getUserId()!=null && address.getUserId().length()>0){
 				criteria.andUserIdLike("%"+address.getUserId()+"%");
 			}
@@ -117,11 +117,11 @@ public class AddressServiceImpl implements AddressService {
 			if(address.getAlias()!=null && address.getAlias().length()>0){
 				criteria.andAliasLike("%"+address.getAlias()+"%");
 			}
-	
+
 		}
-		
-		Page<TbAddress> page= (Page<TbAddress>)addressMapper.selectByExample(example);		
+
+		Page<TbAddress> page= (Page<TbAddress>)addressMapper.selectByExample(example);
 		return new PageResult(page.getTotal(), page.getResult());
 	}
-	
+
 }
