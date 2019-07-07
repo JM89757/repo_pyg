@@ -216,7 +216,7 @@
                             <div ng-repeat="pojo in specList">
                                 <div class="col-md-2 title">{{pojo.text}}</div>
                                 <div class="col-md-10 data">
-					                               
+
                                     <span ng-repeat="option in pojo.options">
                                         <input ng-click="updateSpecAttribute($event,pojo.text,option.optionName);createItemList()"
                                                type="checkbox">
@@ -234,8 +234,9 @@
                             <table class="table table-bordered table-striped table-hover dataTable">
                                 <thead>
                                 <tr>
-                                    <th class="sorting" ng-repeat="item in entity.goodsDesc.specificationItems">
+                                    <th class="sorting" ng-repeat="item in entity.tbGoodsDesc.specificationItems">
                                         {{item.attributeName}}
+                                        <!--{{item}}-->
                                     </th>
                                     <th class="sorting">价格</th>
                                     <th class="sorting">库存</th>
